@@ -36,7 +36,6 @@ public class MazeSquare extends GameSquare
 		setHighlight(true); // so that it highlights it when it moves
 		sqCurrent.visitedSq = true; //taking the current square as target square and making it visited
 		counterPath.add(sqCurrent); //adding the current square to the first piece of the path
-		//System.out.println(sqCurrent.getXLocation() + ", " + sqCurrent.getYLocation()); test
 
 		if(sqCurrent.target == true){ //if target is reached
 			System.out.println("Solution found!!!");
@@ -54,6 +53,7 @@ public class MazeSquare extends GameSquare
 				MazeSquare.shortestPath = counterPath;
 			}
 			counterPath.remove(sqCurrent);
+			//board.reset(counterPath.size());
 			return;
 		} else if (!solution){ //first check wall, then if visited, so that we can move around even on visited squares
 			if(!sqCurrent.getWall(1)){ //checks right wall
@@ -61,7 +61,6 @@ public class MazeSquare extends GameSquare
 				MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation() + 1, sqCurrent.getYLocation());
 				if(!current.visitedSq){
 					DFS(current); //recursive
-					//sqCurrent.visitedSq = false;
 				}
 			}
 			if(!sqCurrent.getWall(0)){ //checks left wall
@@ -69,7 +68,6 @@ public class MazeSquare extends GameSquare
 				MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation() - 1, sqCurrent.getYLocation());
 				if(!current.visitedSq){
 					DFS(current); //recursive
-					//sqCurrent.visitedSq = false;
 				}
 			}
 			if(!sqCurrent.getWall(2)){ //checks top wall
@@ -77,7 +75,6 @@ public class MazeSquare extends GameSquare
 				MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation(), sqCurrent.getYLocation() - 1);
 				if(!current.visitedSq){
 					DFS(current); //recursive
-					//sqCurrent.visitedSq = false;
 				}
 			}
 			if(!sqCurrent.getWall(3)){ //checks bottom wall
@@ -85,13 +82,11 @@ public class MazeSquare extends GameSquare
 				MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation(), sqCurrent.getYLocation() + 1);
 				if(!current.visitedSq){
 					DFS(current); //recursive
-					//sqCurrent.visitedSq = false;
 				}
 			}
-			//sqCurrent.visitedSq = false;
 			counterPath.remove(sqCurrent); //removes dead edges - early returns, whenever a square has been visited and it backtracks, it removes it from the count
 		}
-		//sqCurrent.visitedSq = false;
+
 		for (MazeSquare highlighter : MazeSquare.shortestPath) { //looping through the shortestPath and highlighting every square
 			highlighter.setHighlight(true);
 		}
