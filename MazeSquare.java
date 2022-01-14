@@ -10,7 +10,6 @@ public class MazeSquare extends GameSquare
 {
 	private GameBoard board;			// A reference to the GameBoard this square is part of.
 	private boolean target;				// true if this square is the target of the search.
-	private boolean solution = false;	// initialised as false, because at the start we don't have a solution
 
 	private boolean visitedSq[][] = new boolean [10][10];	// true if visited, false if not.
 	private int shorterPath[][] = new int [10][10];  //paths
@@ -19,9 +18,6 @@ public class MazeSquare extends GameSquare
 	private int targetY = -1;
 
 	private static int shortestCount;	// The shortest path found so far in this search.
-
-	//private ArrayList<MazeSquare> counterPath = new ArrayList<>();	//the current path when the DFS is still searching
-	//private static ArrayList<MazeSquare> shortestPath = new ArrayList<>(); //the shortest path
 	
 	/**
 	 * Create a new GameSquare, which can be placed on a GameBoard.
@@ -45,9 +41,8 @@ public class MazeSquare extends GameSquare
 	public void DFS(GameSquare gameSquare, int x, int y, int counter){
 		visitedSq[x][y] = true; //taking the coordinates of target square and making it visited
 		shorterPath[x][y] = counter;	//initialising the paths to be the path from arguments - starts from 0
-
+		
 		if(x == targetX && y == targetY){ //if target is reached
-			solution = true;	//our solution has been found
 			return;
 		} 
 		
