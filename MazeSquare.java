@@ -10,9 +10,11 @@ public class MazeSquare extends GameSquare
 {
 	private GameBoard board;			// A reference to the GameBoard this square is part of.
 	private boolean target;				// true if this square is the target of the search.
+	private boolean solution = false;	// initialised as false, because at the start we don't have a solution
+
 	private boolean visitedSq[][] = new boolean [10][10];	// true if visited, false if not.
-	private int weights[][] = new int [10][10];
-	private boolean solution = false;			// true if solution is found
+	private int shorterPath[][] = new int [10][10];  //paths
+	
 	private int targetX = -1;
 	private int targetY = -1;
 
@@ -33,94 +35,78 @@ public class MazeSquare extends GameSquare
 		this.board = board;
 	}
 
-	public void DFS(GameSquare gameSquare, int x, int y, int weight){
-		//setHighlight(true); // so that it highlights it when it moves
-		visitedSq[x][y] = true; //taking the current square as target square and making it visited
-		weights[x][y] = weight;
-		//counterPath.add(sqCurrent); //adding the current square to the first piece of the path
+	/**
+	 * Method for Depth-First Search, which is my algorithm for finding the paths
+	 * @param gameSquare the GameBoard that this square resides on.
+	 * @param x  the x co-ordinate of this square on the game board.
+	 * @param y  the y co-ordinate of this square on the game board.
+	 * @param counter the int counting the path
+	 */
+	public void DFS(GameSquare gameSquare, int x, int y, int counter){
+		visitedSq[x][y] = true; //taking the coordinates of target square and making it visited
+		shorterPath[x][y] = counter;	//initialising the paths to be the path from arguments - starts from 0
 
 		if(x == targetX && y == targetY){ //if target is reached
-			//System.out.println("Solution found!!!");
-			solution = true;
+			solution = true;	//our solution has been found
 			return;
-			//visitedSq[x][y] = false;
-
-			/*if (counterPath.size() < MazeSquare.shortestCount || MazeSquare.shortestCount == 0){ //if shortestCount is 0 or bigger than our current path
-				MazeSquare.shortestCount = counterPath.size();	//make shortestCount equal our current path >0
-				for(MazeSquare loop : counterPath){	//looping through our current path
-					MazeSquare.shortestPath.add(loop); //and adding the elements into the shortest path
-				}
-			}
-
-			if (MazeSquare.shortestPath.size() > counterPath.size()){
-				MazeSquare.shortestPath = counterPath;
-			}
-			counterPath.remove(sqCurrent);
-			//board.reset(counterPath.size());
-			return;*/
-		}  //first check wall, then if visited, so that we can move around even on visited squares
-			
+		} 
+		
+		//starts with checking directions 
 		if(!gameSquare.getWall(0) && x > 0){ //checks left wall
-				//System.out.println("LEFT"); test
-				//MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation() - 1, sqCurrent.getYLocation());
-			if(!visitedSq[x-1][y] || weights[x-1][y] > weight){
-					DFS(board.getSquareAt(x-1, y), x-1, y, weight+1); //recursive
+			if(!visitedSq[x-1][y] || shorterPath[x-1][y] > counter){	//if left square hasn't been visited or 
+					DFS(board.getSquareAt(x-1, y), x-1, y, counter+1); //recursive - go to the square and add 1 to the path variable
 				}
 			}
 		if(!gameSquare.getWall(1) && x < 9){ //checks right wall
-				//System.out.println("RIGHT"); test
-				//MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation() + 1, sqCurrent.getYLocation());
-				if(!visitedSq[x+1][y] || weights[x+1][y] > weight){
-					DFS(board.getSquareAt(x+1, y), x+1, y, weight+1); //recursive
+				if(!visitedSq[x+1][y] || shorterPath[x+1][y] > counter){	//if right square hasn't been visited
+					DFS(board.getSquareAt(x+1, y), x+1, y, counter+1); //recursive - go to the square and add 1 to the path variable
 				}
 			}
 		if(!gameSquare.getWall(2) && y > 0){ //checks top wall
-				//System.out.println("TOP"); test
-				//MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation(), sqCurrent.getYLocation() - 1);
-				if(!visitedSq[x][y-1] || weights[x][y-1] > weight){
-					DFS(board.getSquareAt(x, y-1), x, y-1, weight+1); //recursive
+				if(!visitedSq[x][y-1] || shorterPath[x][y-1] > counter){ //if top square hasn't been visited
+					DFS(board.getSquareAt(x, y-1), x, y-1, counter+1); //recursive - go to the square and add 1 to the path variable
 				}
 			}
 		if(!gameSquare.getWall(3) && y < 9){ //checks bottom wall
-				//System.out.println("BOTTOM"); test
-				//MazeSquare current = (MazeSquare) board.getSquareAt(sqCurrent.getXLocation(), sqCurrent.getYLocation() + 1);
-				if(!visitedSq[x][y+1] || weights[x][y+1] > weight){
-					DFS(board.getSquareAt(x, y+1), x, y+1, weight+1); //recursive
+				if(!visitedSq[x][y+1] || shorterPath[x][y+1] > counter){ //if bottom square hasn't been visited
+					DFS(board.getSquareAt(x, y+1), x, y+1, counter+1); //recursive - go to the square and add 1 to the path variable
 				}
 			}
-			//counterPath.remove(gameSquare); //removes dead edges - early returns, whenever a square has been visited and it backtracks, it removes it from the count
-			return;
-		}
+		return;
+	}
 
-		/*for (MazeSquare highlighter : MazeSquare.shortestPath) { //looping through the shortestPath and highlighting every square
-			highlighter.setHighlight(true);
-		}*/
+	/**
+	 * The method that finds the shortest paths out of them all.
+	 * @param gameSquare the GameBoard that this square resides on.
+	 * @param counter the int counting the path
+	 */
+	public void shortestPath (GameSquare gameSquare, int counter){
+		GameSquare nextSquare; //the nextsquare in our path
+		gameSquare.setHighlight(true); //highlight the current (or previous ones) to be yellow - visited
+		shortestCount++; //adding to the shortest path 
 
-	public void shortestPath (GameSquare gameSquare, int weight){
-		GameSquare nextSquare;
-		gameSquare.setHighlight(true);
-		shortestCount++;
-
-		int x = gameSquare.getXLocation();
+		//coordinates to get the location
+		int x = gameSquare.getXLocation(); 
 		int y = gameSquare.getYLocation();
 
-		if(weight == 0){
+		//making sure the path length can't be 0
+		if(counter == 0){
 			return;
 		}
 
-		if(!gameSquare.getWall(0) && weights[x-1][y] == weight - 1){
-			nextSquare = board.getSquareAt(x-1, y);
+		if(!gameSquare.getWall(0) && shorterPath[x-1][y] == counter - 1){ //if there is a wall on the left and the shortest path coordinates pass through the shortest counter
+			nextSquare = board.getSquareAt(x-1, y); //the next left square is added to the path
 		} 
-		else if ((!gameSquare.getWall(1) && weights[x+1][y] == weight - 1)){
-			nextSquare = board.getSquareAt(x+1, y);
+		else if ((!gameSquare.getWall(1) && shorterPath[x+1][y] == counter - 1)){
+			nextSquare = board.getSquareAt(x+1, y); //the next right square is added to the path
 		} 
-		else if((!gameSquare.getWall(2) && weights[x][y-1] == weight - 1)){
-			nextSquare = board.getSquareAt(x, y-1);
+		else if((!gameSquare.getWall(2) && shorterPath[x][y-1] == counter - 1)){
+			nextSquare = board.getSquareAt(x, y-1); //the next top square is added to the path
 		} else {
-			nextSquare = board.getSquareAt(x, y+1);
+			nextSquare = board.getSquareAt(x, y+1); //the next bottom square is added to the path
 		}
 
-		shortestPath(nextSquare, weight-1);
+		shortestPath(nextSquare, counter-1);	//making sure that the SHORTEST PATH IS ALWAYS THE SMALLEST WEIGHT NUMBER
 	}
 
 	/**
@@ -129,7 +115,7 @@ public class MazeSquare extends GameSquare
 	 */	
     public void leftClicked()
 	{
-		board.reset(0);
+		board.reset(0); //reseting every time i click the left button so it starts over again
 		this.target = true; //end point
 		this.setHighlight(true); //highlighting the left click
 	}
@@ -142,12 +128,14 @@ public class MazeSquare extends GameSquare
 	{
 		boolean solutionFound = false;
 
+		//making all the squares false
 		for(int i = 0; i < 10;i++){
 			for(int j = 0; j < 10; j++){
 				visitedSq[i][j] = false;
 			}
 		}
 
+		//if going through all the squares, the one i click is highlighted then a solution has been found
 		for(int i = 0; i < 10; i++){
 			for(int j = 0; j < 10; j++){
 				if(board.getSquareAt(i, j).isHighlighted()){
@@ -162,13 +150,14 @@ public class MazeSquare extends GameSquare
 			}
 		}
 
+		//if a solution has been found
 		if(solutionFound){
 			MazeSquare.shortestCount = 0; //before the DFS method so that it changes
 
 			DFS(this, getXLocation(), getYLocation(), 0); //calling method
-			board.reset(0);
+			board.reset(0); //resetting
 
-			shortestPath(board.getSquareAt(targetX, targetY), weights[targetX][targetY]);
+			shortestPath(board.getSquareAt(targetX, targetY), shorterPath[targetX][targetY]); //finding the shortest path
 
 			System.out.println(" *** COMPLETE: SHORTEST ROUTE " + (MazeSquare.shortestCount == 0 ? "IMPOSSIBLE" : MazeSquare.shortestCount) + " ***");
 		}
@@ -182,7 +171,8 @@ public class MazeSquare extends GameSquare
 	public void reset(int n)
 	{
 		this.setHighlight(false);
-		if(this.target)
+		if(this.target){
 			this.target = false;
+		}
 	}
 }
