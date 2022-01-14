@@ -98,6 +98,7 @@ public class MazeSquare extends GameSquare
 	 */	
     public void leftClicked()
 	{
+		board.reset(0);
 		setHighlight(true); //highlighting the left click
 		this.target = true; //end point
 	}
@@ -118,5 +119,10 @@ public class MazeSquare extends GameSquare
 	 * 
 	 * @param n An unspecified value that matches that provided in the call to GameBoard reset()
 	 */
-	public void reset(int n){}
+	public void reset(int n)
+	{
+		this.setHighlight(false);
+		if(this.target)
+			this.target = false;
+	}
 }
